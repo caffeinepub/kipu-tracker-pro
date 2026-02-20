@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
+  "projectStateVersion": 17,
   "summary": "Multi-user EMR case tracking system with detailed ticket classification, task types, and time logging for healthcare support teams",
   "architectural_notes": [
     "Backend built with Motoko canisters for on-chain data storage",
@@ -10,8 +10,11 @@
     "Time logging in IST format with automatic AM/PM detection",
     "Comprehensive ticket lifecycle tracking from origin to resolution"
   ],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Mode toggle option is not functioning correctly",
+    "Case edit functionality fails to update cases after submission"
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-implement-internet-identity-authentication-system-allowing-users-to-sign-in-with-passkeys-google-apple-or-microsoft-accounts",
@@ -260,6 +263,118 @@
         "REQ-34"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-a-live-elapsed-time-display-to-the-casetimercontrols-component-that-shows-the-running-duration-formatted-as-hh-mm-ss-whenever-a-case-timer-is-active-updating-every-second-from-the-case-start-time-until-the-stop-button-is-pressed",
+      "title": "Add a live elapsed time display to the CaseTimerControls component that shows the running duration (formatted as HH:MM:SS) whenever a case timer is active, updating every second from the case start time until the Stop button is pressed",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-current-color-scheme-with-dark-navy-blue-background-1a1f2e-or-similar-throughout-the-entire-application",
+      "title": "Replace current color scheme with dark navy blue background (#1a1f2e or similar) throughout the entire application",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-header-navigation-to-display-mode-toggle-sync-button-notification-bell-icon-and-reset-button-in-the-top-right-corner-with-button-styling-matching-the-reference-image",
+      "title": "Update header navigation to display Mode toggle, Sync button, notification bell icon, and Reset button in the top-right corner with button styling matching the reference image",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-style-the-break-button-in-the-top-right-corner-with-pink-magenta-background-and-white-text-matching-the-reference-image-design",
+      "title": "Style the Break button in the top-right corner with pink/magenta background and white text matching the reference image design",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-progress-cards-shift-progress-and-utilization-with-gradient-backgrounds-rounded-corners-and-icon-badges-as-shown-in-the-reference-image",
+      "title": "Redesign the progress cards (Shift Progress and Utilization) with gradient backgrounds, rounded corners, and icon badges as shown in the reference image",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-all-form-inputs-date-time-dropdowns-text-fields-to-use-dark-backgrounds-with-light-text-and-borders-matching-the-reference-image-styling",
+      "title": "Update all form inputs (date, time, dropdowns, text fields) to use dark backgrounds with light text and borders matching the reference image styling",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-style-the-start-break-and-stop-buttons-with-green-purple-and-red-gradient-backgrounds-respectively-matching-the-reference-image-button-design",
+      "title": "Style the Start, Break, and Stop buttons with green, purple, and red gradient backgrounds respectively, matching the reference image button design",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-save-record-button-to-use-purple-indigo-background-with-white-text-and-rounded-corners-matching-the-reference-design",
+      "title": "Update the Save Record button to use purple/indigo background with white text and rounded corners matching the reference design",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-redesign-the-recent-cases-list-at-the-bottom-of-the-dashboard-to-use-dark-card-backgrounds-with-appropriate-spacing-and-typography-matching-the-reference-image",
+      "title": "Redesign the recent cases list at the bottom of the dashboard to use dark card backgrounds with appropriate spacing and typography matching the reference image",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-typography-throughout-the-application-to-match-the-reference-image-using-appropriate-font-weights-and-sizes-for-headers-labels-and-body-text",
+      "title": "Update typography throughout the application to match the reference image, using appropriate font weights and sizes for headers, labels, and body text",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-interactive-elements-buttons-inputs-dropdowns-have-subtle-hover-and-focus-states-that-work-well-with-the-dark-theme",
+      "title": "Ensure all interactive elements (buttons, inputs, dropdowns) have subtle hover and focus states that work well with the dark theme",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-identify-and-remove-the-duplicate-header-component-from-the-application-ui-keeping-only-one-header-navigation-element-visible-across-all-pages",
+      "title": "Identify and remove the duplicate header component from the application UI, keeping only one header navigation element visible across all pages",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-investigate-and-fix-the-mode-toggle-button-in-the-header-navigation-that-is-currently-non-functional-ensuring-it-properly-switches-between-manual-and-auto-time-entry-modes-in-the-casetimercontrols-component",
+      "title": "Investigate and fix the Mode toggle button in the header navigation that is currently non-functional, ensuring it properly switches between manual and auto time entry modes in the CaseTimerControls component",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-debug-and-fix-the-case-edit-functionality-in-editcasemodal-that-is-failing-to-update-cases-ensuring-edited-case-data-is-properly-submitted-to-the-backend-and-reflected-in-the-case-list",
+      "title": "Debug and fix the case edit functionality in EditCaseModal that is failing to update cases, ensuring edited case data is properly submitted to the backend and reflected in the case list",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -328,6 +443,18 @@
     {
       "id": "AR-40",
       "summary": "Add case edit functionality to modify logged cases after submission",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-41",
+      "summary": "Add live timer display showing elapsed time when case work starts",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-42",
+      "summary": "Remove duplicate header from the application UI",
       "reqIds": [],
       "status": "pending"
     }

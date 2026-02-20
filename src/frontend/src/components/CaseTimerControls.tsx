@@ -1,45 +1,33 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Play, Square, Coffee, Clock } from 'lucide-react';
-import { useCreateCase } from '@/hooks/useQueries';
+import React, { useState, useEffect } from 'react';
+import { Play, Square, Save, Coffee } from 'lucide-react';
+import { useCreateCase, useGetCallerUserProfile } from '../hooks/useQueries';
+import { TaskType, CaseOrigin, CaseType, AssistanceNeeded, TicketStatus, EscalationTransferType, Department } from '../backend';
+import { convertToNanoseconds, getCurrentISTDatetimeLocal, validateTimeRange } from '../utils/timeHelpers';
+import { useElapsedTime } from '../hooks/useElapsedTime';
 import { toast } from 'sonner';
-import {
-  TaskType,
-  CaseOrigin,
-  CaseType,
-  AssistanceNeeded,
-  TicketStatus,
-  EscalationTransferType,
-  Department,
-} from '@/backend';
-import { dateTimeLocalToNano, validateTimeRange, dateToDateTimeLocal } from '@/utils/timeHelpers';
+import type { TimeEntryMode } from './Layout';
 
 interface CaseTimerControlsProps {
+  mode?: TimeEntryMode;
   onBreakStart?: () => void;
 }
 
-export default function CaseTimerControls({ onBreakStart }: CaseTimerControlsProps) {
+export default function CaseTimerControls({ mode = 'auto', onBreakStart }: CaseTimerControlsProps) {
+  const { data: userProfile } = useGetCallerUserProfile();
+  const createCase = useCreateCase();
+
   const [isRunning, setIsRunning] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [manualMode, setManualMode] = useState(false);
-
-  // Basic fields
-  const [agentName, setAgentName] = useState('');
   const [taskType, setTaskType] = useState<TaskType>(TaskType.supportEMRTickets);
   const [notes, setNotes] = useState('');
 
-  // Manual time entry fields
+  // Manual mode fields
+  const [manualStartDate, setManualStartDate] = useState('');
   const [manualStartTime, setManualStartTime] = useState('');
+  const [manualEndDate, setManualEndDate] = useState('');
   const [manualEndTime, setManualEndTime] = useState('');
 
-  // EMR-specific fields (conditional)
+  // EMR-specific fields
   const [caseOrigin, setCaseOrigin] = useState<CaseOrigin | ''>('');
   const [emrCaseNumber, setEmrCaseNumber] = useState('');
   const [caseType, setCaseType] = useState<CaseType | ''>('');
@@ -48,495 +36,381 @@ export default function CaseTimerControls({ onBreakStart }: CaseTimerControlsPro
   const [escalationTransferType, setEscalationTransferType] = useState<EscalationTransferType | ''>('');
   const [escalationTransferDestination, setEscalationTransferDestination] = useState<Department | ''>('');
 
-  const createCase = useCreateCase();
+  const elapsedTime = useElapsedTime(isRunning ? startTime : null);
 
-  const isEMRTicket = taskType === TaskType.supportEMRTickets;
-  const showDestination =
-    escalationTransferType === EscalationTransferType.escalated ||
-    escalationTransferType === EscalationTransferType.transferred;
+  const isEMRTask = taskType === TaskType.supportEMRTickets;
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isRunning && startTime) {
-      interval = setInterval(() => {
-        setElapsedSeconds(Math.floor((Date.now() - startTime) / 1000));
-      }, 1000);
+    if (mode === 'manual') {
+      const now = getCurrentISTDatetimeLocal();
+      setManualStartDate(now.split('T')[0]);
+      setManualStartTime(now.split('T')[1]);
+      setManualEndDate(now.split('T')[0]);
+      setManualEndTime(now.split('T')[1]);
     }
-    return () => clearInterval(interval);
-  }, [isRunning, startTime]);
-
-  const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600)
-      .toString()
-      .padStart(2, '0');
-    const m = Math.floor((seconds % 3600) / 60)
-      .toString()
-      .padStart(2, '0');
-    const s = (seconds % 60).toString().padStart(2, '0');
-    return `${h}:${m}:${s}`;
-  };
+  }, [mode]);
 
   const handleStart = () => {
-    if (!agentName.trim()) {
-      toast.error('Please enter agent name');
-      return;
-    }
-    setIsRunning(true);
-    setStartTime(Date.now());
-    setElapsedSeconds(0);
-  };
-
-  const handleStop = async () => {
-    if (!startTime) return;
-
-    // Validation for EMR tickets
-    if (isEMRTicket) {
-      if (!caseType) {
-        toast.error('Case Type is required for EMR tickets');
-        return;
-      }
-      if (!assistanceNeeded) {
-        toast.error('Assistance Needed is required for EMR tickets');
-        return;
-      }
-      if (!ticketStatus) {
-        toast.error('Ticket Case Status is required for EMR tickets');
-        return;
-      }
-      if (!escalationTransferType) {
-        toast.error('Escalation/Transfer classification is required for EMR tickets');
-        return;
-      }
-      if (showDestination && !escalationTransferDestination) {
-        toast.error('Please select escalation/transfer destination');
-        return;
-      }
-    }
-
-    const endTime = Date.now();
-    const startNano = BigInt(startTime) * BigInt(1_000_000);
-    const endNano = BigInt(endTime) * BigInt(1_000_000);
-
-    try {
-      await createCase.mutateAsync({
-        agentName: agentName.trim(),
-        taskType,
-        caseOrigin: isEMRTicket && caseOrigin ? caseOrigin : null,
-        emrCaseNumber: isEMRTicket && emrCaseNumber ? emrCaseNumber : null,
-        caseType: isEMRTicket && caseType ? caseType : null,
-        assistanceNeeded: isEMRTicket && assistanceNeeded ? assistanceNeeded : null,
-        ticketStatus: isEMRTicket && ticketStatus ? ticketStatus : null,
-        escalationTransferType: isEMRTicket && escalationTransferType ? escalationTransferType : null,
-        escalationTransferDestination:
-          isEMRTicket && showDestination && escalationTransferDestination ? escalationTransferDestination : null,
-        start: startNano,
-        end: endNano,
-        notes: notes || '',
-      });
-
-      toast.success('Case logged successfully!');
-      resetForm();
-    } catch (error: any) {
-      if (error.message?.includes('conflict')) {
-        toast.error('Time conflict detected! This overlaps with an existing case.');
-      } else {
-        toast.error('Failed to log case');
-      }
-      console.error(error);
+    if (mode === 'auto') {
+      setStartTime(Date.now());
+      setIsRunning(true);
+      toast.success('Timer started');
+    } else {
+      toast.info('In manual mode - set times and click Save Record');
     }
   };
 
-  const handleManualSubmit = async () => {
-    if (!agentName.trim()) {
-      toast.error('Please enter agent name');
-      return;
-    }
-
-    if (!manualStartTime || !manualEndTime) {
-      toast.error('Start and end times are required');
-      return;
-    }
-
-    if (!validateTimeRange(manualStartTime, manualEndTime)) {
-      toast.error('End time must be after start time');
-      return;
-    }
-
-    // Validation for EMR tickets
-    if (isEMRTicket) {
-      if (!caseType) {
-        toast.error('Case Type is required for EMR tickets');
-        return;
-      }
-      if (!assistanceNeeded) {
-        toast.error('Assistance Needed is required for EMR tickets');
-        return;
-      }
-      if (!ticketStatus) {
-        toast.error('Ticket Case Status is required for EMR tickets');
-        return;
-      }
-      if (!escalationTransferType) {
-        toast.error('Escalation/Transfer classification is required for EMR tickets');
-        return;
-      }
-      if (showDestination && !escalationTransferDestination) {
-        toast.error('Please select escalation/transfer destination');
-        return;
-      }
-    }
-
-    try {
-      await createCase.mutateAsync({
-        agentName: agentName.trim(),
-        taskType,
-        caseOrigin: isEMRTicket && caseOrigin ? caseOrigin : null,
-        emrCaseNumber: isEMRTicket && emrCaseNumber ? emrCaseNumber : null,
-        caseType: isEMRTicket && caseType ? caseType : null,
-        assistanceNeeded: isEMRTicket && assistanceNeeded ? assistanceNeeded : null,
-        ticketStatus: isEMRTicket && ticketStatus ? ticketStatus : null,
-        escalationTransferType: isEMRTicket && escalationTransferType ? escalationTransferType : null,
-        escalationTransferDestination:
-          isEMRTicket && showDestination && escalationTransferDestination ? escalationTransferDestination : null,
-        start: dateTimeLocalToNano(manualStartTime),
-        end: dateTimeLocalToNano(manualEndTime),
-        notes: notes || '',
-      });
-
-      toast.success('Case logged successfully!');
-      resetForm();
-    } catch (error: any) {
-      if (error.message?.includes('conflict')) {
-        toast.error('Time conflict detected! This overlaps with an existing case.');
-      } else {
-        toast.error('Failed to log case');
-      }
-      console.error(error);
-    }
-  };
-
-  const resetForm = () => {
+  const handleStop = () => {
     setIsRunning(false);
-    setStartTime(null);
-    setElapsedSeconds(0);
-    setNotes('');
-    setManualStartTime('');
-    setManualEndTime('');
-    // Reset EMR fields
-    setCaseOrigin('');
-    setEmrCaseNumber('');
-    setCaseType('');
-    setAssistanceNeeded('');
-    setTicketStatus('');
-    setEscalationTransferType('');
-    setEscalationTransferDestination('');
+    toast.info('Timer stopped - click Save Record to save');
+  };
+
+  const handleBreak = () => {
+    if (onBreakStart) {
+      onBreakStart();
+    }
+  };
+
+  const handleSave = async () => {
+    if (!userProfile) {
+      toast.error('User profile not found');
+      return;
+    }
+
+    try {
+      let startNs: bigint;
+      let endNs: bigint;
+
+      if (mode === 'auto') {
+        if (!startTime) {
+          toast.error('Please start the timer first');
+          return;
+        }
+        const endTime = Date.now();
+        startNs = convertToNanoseconds(startTime);
+        endNs = convertToNanoseconds(endTime);
+      } else {
+        // Manual mode
+        if (!manualStartDate || !manualStartTime || !manualEndDate || !manualEndTime) {
+          toast.error('Please fill in all date and time fields');
+          return;
+        }
+
+        const startDatetime = `${manualStartDate}T${manualStartTime}`;
+        const endDatetime = `${manualEndDate}T${manualEndTime}`;
+
+        const validation = validateTimeRange(startDatetime, endDatetime);
+        if (!validation.valid) {
+          toast.error(validation.error || 'Invalid time range');
+          return;
+        }
+
+        startNs = convertToNanoseconds(new Date(startDatetime).getTime());
+        endNs = convertToNanoseconds(new Date(endDatetime).getTime());
+      }
+
+      // Validate EMR fields if needed
+      if (isEMRTask) {
+        if (!caseOrigin || !emrCaseNumber || !caseType || !assistanceNeeded || !ticketStatus) {
+          toast.error('Please fill in all required EMR fields');
+          return;
+        }
+      }
+
+      await createCase.mutateAsync({
+        agentName: userProfile.username,
+        taskType,
+        caseOrigin: caseOrigin || null,
+        emrCaseNumber: emrCaseNumber || null,
+        caseType: caseType || null,
+        assistanceNeeded: assistanceNeeded || null,
+        ticketStatus: ticketStatus || null,
+        escalationTransferType: escalationTransferType || null,
+        escalationTransferDestination: escalationTransferDestination || null,
+        start: startNs,
+        end: endNs,
+        notes,
+      });
+
+      // Reset form
+      setIsRunning(false);
+      setStartTime(null);
+      setNotes('');
+      setCaseOrigin('');
+      setEmrCaseNumber('');
+      setCaseType('');
+      setAssistanceNeeded('');
+      setTicketStatus('');
+      setEscalationTransferType('');
+      setEscalationTransferDestination('');
+      
+      if (mode === 'manual') {
+        const now = getCurrentISTDatetimeLocal();
+        setManualStartDate(now.split('T')[0]);
+        setManualStartTime(now.split('T')[1]);
+        setManualEndDate(now.split('T')[0]);
+        setManualEndTime(now.split('T')[1]);
+      }
+
+      toast.success('Case saved successfully');
+    } catch (error: any) {
+      console.error('Error saving case:', error);
+      toast.error(error.message || 'Failed to save case');
+    }
   };
 
   return (
-    <Card className="shadow-lg border-2">
-      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
-        <CardTitle className="flex items-center gap-2">
-          <Play className="h-5 w-5 text-chart-1" />
-          Live Case Tracker
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5 pt-6">
-        <div className="flex items-center justify-between p-3 bg-accent/50 rounded-lg">
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="manual-mode" className="text-sm font-medium cursor-pointer">
-              Manual Time Entry
-            </Label>
+    <div className="bg-[#1e2433]/80 backdrop-blur-sm rounded-xl p-6 border border-gray-800 shadow-lg">
+      <h2 className="text-2xl font-bold mb-6 text-gray-100">Case Tracking</h2>
+
+      {mode === 'auto' && (
+        <div className="mb-6 text-center">
+          <div className="text-6xl font-mono font-bold text-blue-400">
+            {elapsedTime}
           </div>
-          <Switch
-            id="manual-mode"
-            checked={manualMode}
-            onCheckedChange={(checked) => {
-              setManualMode(checked);
-              if (checked && !manualStartTime) {
-                const now = new Date();
-                setManualStartTime(dateToDateTimeLocal(now));
-              }
-            }}
-            disabled={isRunning}
-          />
+          <p className="text-gray-400 mt-2">Elapsed Time</p>
         </div>
+      )}
 
-        <div className="space-y-2">
-          <Label htmlFor="agentName">Agent Name</Label>
-          <Input
-            id="agentName"
-            placeholder="Enter your name"
-            value={agentName}
-            onChange={(e) => setAgentName(e.target.value)}
-            disabled={isRunning}
-            className="border-2 focus:border-primary"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="taskType">Task Type</Label>
-          <Select value={taskType} onValueChange={(v) => setTaskType(v as TaskType)} disabled={isRunning}>
-            <SelectTrigger id="taskType" className="border-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={TaskType.supportEMRTickets}>Support EMR Tickets</SelectItem>
-              <SelectItem value={TaskType.break15}>Break - 15</SelectItem>
-              <SelectItem value={TaskType.break30}>Break - 30</SelectItem>
-              <SelectItem value={TaskType.clientMeeting}>Client Meeting</SelectItem>
-              <SelectItem value={TaskType.clientSideTraining}>Client Side Training</SelectItem>
-              <SelectItem value={TaskType.internalTeamMeeting}>Internal Team Meeting</SelectItem>
-              <SelectItem value={TaskType.pod}>POD</SelectItem>
-              <SelectItem value={TaskType.feedbackReview}>Feedback/Review</SelectItem>
-              <SelectItem value={TaskType.internalTraining}>Internal Training (Conducted by EQX)</SelectItem>
-              <SelectItem value={TaskType.trainingNewTeamMember}>Training - New Team Member</SelectItem>
-              <SelectItem value={TaskType.trainingFeedbackNewTeamMember}>
-                Training Feedback - New Team Member
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        {manualMode ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-accent/30 rounded-lg border-2 border-dashed">
-            <div className="space-y-2">
-              <Label htmlFor="manualStartTime">Start Time</Label>
-              <Input
-                id="manualStartTime"
-                type="datetime-local"
+      <div className="space-y-4">
+        {mode === 'manual' && (
+          <div className="grid grid-cols-2 gap-4 p-4 bg-[#252b3d] rounded-lg border border-gray-700">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
+              <input
+                type="date"
+                value={manualStartDate}
+                onChange={(e) => setManualStartDate(e.target.value)}
+                className="w-full px-3 py-2 bg-[#1a1f2e] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Start Time</label>
+              <input
+                type="time"
                 value={manualStartTime}
                 onChange={(e) => setManualStartTime(e.target.value)}
-                className="border-2"
+                className="w-full px-3 py-2 bg-[#1a1f2e] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="manualEndTime">End Time</Label>
-              <Input
-                id="manualEndTime"
-                type="datetime-local"
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">End Date</label>
+              <input
+                type="date"
+                value={manualEndDate}
+                onChange={(e) => setManualEndDate(e.target.value)}
+                className="w-full px-3 py-2 bg-[#1a1f2e] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">End Time</label>
+              <input
+                type="time"
                 value={manualEndTime}
                 onChange={(e) => setManualEndTime(e.target.value)}
-                className="border-2"
+                className="w-full px-3 py-2 bg-[#1a1f2e] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-center p-6 bg-gradient-to-br from-primary/10 to-chart-2/10 rounded-xl border-2">
-            <div className="text-center">
-              <div className="text-5xl font-bold font-mono text-primary mb-2">{formatTime(elapsedSeconds)}</div>
-              <div className="text-sm text-muted-foreground">
-                {isRunning ? 'Timer Running' : 'Ready to Start'}
-              </div>
             </div>
           </div>
         )}
 
-        {isEMRTicket && (
-          <div className="border-t-2 pt-5 space-y-4">
-            <h3 className="font-semibold text-sm flex items-center gap-2 text-primary">
-              <span className="h-1 w-1 rounded-full bg-primary"></span>
-              Case Classification – EMR
-            </h3>
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Task Type</label>
+          <select
+            value={taskType}
+            onChange={(e) => setTaskType(e.target.value as TaskType)}
+            className="w-full px-3 py-2 bg-[#252b3d] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value={TaskType.supportEMRTickets}>Support EMR Tickets</option>
+            <option value={TaskType.break15}>Break (15 min)</option>
+            <option value={TaskType.break30}>Break (30 min)</option>
+            <option value={TaskType.clientMeeting}>Client Meeting</option>
+            <option value={TaskType.clientSideTraining}>Client Side Training</option>
+            <option value={TaskType.internalTeamMeeting}>Internal Team Meeting</option>
+            <option value={TaskType.pod}>POD</option>
+            <option value={TaskType.feedbackReview}>Feedback Review</option>
+            <option value={TaskType.internalTraining}>Internal Training</option>
+            <option value={TaskType.trainingNewTeamMember}>Training New Team Member</option>
+            <option value={TaskType.trainingFeedbackNewTeamMember}>Training Feedback New Team Member</option>
+          </select>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="caseOrigin">Case Origin</Label>
-                <Select value={caseOrigin} onValueChange={(v) => setCaseOrigin(v as CaseOrigin)} disabled={isRunning}>
-                  <SelectTrigger id="caseOrigin">
-                    <SelectValue placeholder="Choose" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={CaseOrigin.chat}>Chat</SelectItem>
-                    <SelectItem value={CaseOrigin.email}>Email</SelectItem>
-                    <SelectItem value={CaseOrigin.voiceCall}>Voice Call</SelectItem>
-                  </SelectContent>
-                </Select>
+        {isEMRTask && (
+          <>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Case Origin *</label>
+                <select
+                  value={caseOrigin}
+                  onChange={(e) => setCaseOrigin(e.target.value as CaseOrigin)}
+                  className="w-full px-3 py-2 bg-[#252b3d] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select...</option>
+                  <option value={CaseOrigin.chat}>Chat</option>
+                  <option value={CaseOrigin.email}>Email</option>
+                  <option value={CaseOrigin.voiceCall}>Voice Call</option>
+                </select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="emrCaseNumber">EMR Case#</Label>
-                <Input
-                  id="emrCaseNumber"
-                  placeholder="Enter case number"
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">EMR Case Number *</label>
+                <input
+                  type="text"
                   value={emrCaseNumber}
                   onChange={(e) => setEmrCaseNumber(e.target.value)}
-                  disabled={isRunning}
+                  className="w-full px-3 py-2 bg-[#252b3d] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter case number"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="caseType">
-                Case Type <span className="text-destructive">*</span>
-              </Label>
-              <Select value={caseType} onValueChange={(v) => setCaseType(v as CaseType)} disabled={isRunning}>
-                <SelectTrigger id="caseType">
-                  <SelectValue placeholder="Select case type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={CaseType.new_}>New</SelectItem>
-                  <SelectItem value={CaseType.followup}>Followup</SelectItem>
-                  <SelectItem value={CaseType.reassigned}>Reassigned</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                New: fresh ticket | Followup: previous day reopen | Reassigned: from another agent
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="assistanceNeeded">
-                Assistance Needed <span className="text-destructive">*</span>
-              </Label>
-              <Select
-                value={assistanceNeeded}
-                onValueChange={(v) => setAssistanceNeeded(v as AssistanceNeeded)}
-                disabled={isRunning}
-              >
-                <SelectTrigger id="assistanceNeeded">
-                  <SelectValue placeholder="Select assistance type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={AssistanceNeeded.no}>No</SelectItem>
-                  <SelectItem value={AssistanceNeeded.equinox}>Equinox</SelectItem>
-                  <SelectItem value={AssistanceNeeded.onshore}>Onshore</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">
-                Equinox: EQX leads help | Onshore: Zendesk Macro | No: followup with existing help
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="ticketStatus">
-                Ticket Case Status <span className="text-destructive">*</span>
-              </Label>
-              <Select value={ticketStatus} onValueChange={(v) => setTicketStatus(v as TicketStatus)} disabled={isRunning}>
-                <SelectTrigger id="ticketStatus">
-                  <SelectValue placeholder="Select final status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={TicketStatus.onHold}>On-Hold</SelectItem>
-                  <SelectItem value={TicketStatus.pending}>Pending</SelectItem>
-                  <SelectItem value={TicketStatus.resolved}>Resolved</SelectItem>
-                  <SelectItem value={TicketStatus.open}>Open</SelectItem>
-                  <SelectItem value={TicketStatus.new_}>New</SelectItem>
-                  <SelectItem value={TicketStatus.escalated}>Escalated</SelectItem>
-                  <SelectItem value={TicketStatus.transferred}>Transferred</SelectItem>
-                </SelectContent>
-              </Select>
-              <p className="text-xs text-muted-foreground">Select the final status after working on the ticket</p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="escalationTransferType">
-                Ticket ESCALATED or TRANSFERRED <span className="text-destructive">*</span>
-              </Label>
-              <Select
-                value={escalationTransferType}
-                onValueChange={(v) => setEscalationTransferType(v as EscalationTransferType)}
-                disabled={isRunning}
-              >
-                <SelectTrigger id="escalationTransferType">
-                  <SelectValue placeholder="Select classification" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={EscalationTransferType.na}>N/A</SelectItem>
-                  <SelectItem value={EscalationTransferType.transferred}>Transferred</SelectItem>
-                  <SelectItem value={EscalationTransferType.escalated}>Escalated</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {showDestination && (
-              <div className="space-y-2">
-                <Label htmlFor="escalationTransferDestination">
-                  Destination Department <span className="text-destructive">*</span>
-                </Label>
-                <Select
-                  value={escalationTransferDestination}
-                  onValueChange={(v) => setEscalationTransferDestination(v as Department)}
-                  disabled={isRunning}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Case Type *</label>
+                <select
+                  value={caseType}
+                  onChange={(e) => setCaseType(e.target.value as CaseType)}
+                  className="w-full px-3 py-2 bg-[#252b3d] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <SelectTrigger id="escalationTransferDestination">
-                    <SelectValue placeholder="Select department" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={Department.csm}>CSM</SelectItem>
-                    <SelectItem value={Department.billing}>Billing</SelectItem>
-                    <SelectItem value={Department.psa}>PSA</SelectItem>
-                    <SelectItem value={Department.clientAdvocates}>Client Advocates</SelectItem>
-                    <SelectItem value={Department.mat}>MAT</SelectItem>
-                    <SelectItem value={Department.erx}>eRx</SelectItem>
-                    <SelectItem value={Department.lab}>Lab</SelectItem>
-                    <SelectItem value={Department.sales}>Sales</SelectItem>
-                    <SelectItem value={Department.accounting}>Accounting</SelectItem>
-                    <SelectItem value={Department.emrSupport}>EMR Support</SelectItem>
-                    <SelectItem value={Department.cleanup}>Cleanup</SelectItem>
-                    <SelectItem value={Department.cas}>CAS</SelectItem>
-                    <SelectItem value={Department.productEnhancement}>Product Enhancement</SelectItem>
-                    <SelectItem value={Department.crm}>CRM</SelectItem>
-                    <SelectItem value={Department.pdmp}>PDMP</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="">Select...</option>
+                  <option value={CaseType.new_}>New</option>
+                  <option value={CaseType.followup}>Follow-up</option>
+                  <option value={CaseType.reassigned}>Reassigned</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Assistance Needed *</label>
+                <select
+                  value={assistanceNeeded}
+                  onChange={(e) => setAssistanceNeeded(e.target.value as AssistanceNeeded)}
+                  className="w-full px-3 py-2 bg-[#252b3d] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select...</option>
+                  <option value={AssistanceNeeded.no}>No</option>
+                  <option value={AssistanceNeeded.equinox}>Equinox</option>
+                  <option value={AssistanceNeeded.onshore}>Onshore</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Ticket Status *</label>
+                <select
+                  value={ticketStatus}
+                  onChange={(e) => setTicketStatus(e.target.value as TicketStatus)}
+                  className="w-full px-3 py-2 bg-[#252b3d] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select...</option>
+                  <option value={TicketStatus.new_}>New</option>
+                  <option value={TicketStatus.open}>Open</option>
+                  <option value={TicketStatus.pending}>Pending</option>
+                  <option value={TicketStatus.onHold}>On Hold</option>
+                  <option value={TicketStatus.resolved}>Resolved</option>
+                  <option value={TicketStatus.escalated}>Escalated</option>
+                  <option value={TicketStatus.transferred}>Transferred</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Escalation/Transfer Type</label>
+                <select
+                  value={escalationTransferType}
+                  onChange={(e) => setEscalationTransferType(e.target.value as EscalationTransferType)}
+                  className="w-full px-3 py-2 bg-[#252b3d] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select...</option>
+                  <option value={EscalationTransferType.na}>N/A</option>
+                  <option value={EscalationTransferType.escalated}>Escalated</option>
+                  <option value={EscalationTransferType.transferred}>Transferred</option>
+                </select>
+              </div>
+            </div>
+
+            {(escalationTransferType === EscalationTransferType.escalated || 
+              escalationTransferType === EscalationTransferType.transferred) && (
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Destination Department</label>
+                <select
+                  value={escalationTransferDestination}
+                  onChange={(e) => setEscalationTransferDestination(e.target.value as Department)}
+                  className="w-full px-3 py-2 bg-[#252b3d] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Select...</option>
+                  <option value={Department.csm}>CSM</option>
+                  <option value={Department.billing}>Billing</option>
+                  <option value={Department.psa}>PSA</option>
+                  <option value={Department.clientAdvocates}>Client Advocates</option>
+                  <option value={Department.mat}>MAT</option>
+                  <option value={Department.erx}>eRx</option>
+                  <option value={Department.lab}>Lab</option>
+                  <option value={Department.sales}>Sales</option>
+                  <option value={Department.accounting}>Accounting</option>
+                  <option value={Department.emrSupport}>EMR Support</option>
+                  <option value={Department.cleanup}>Cleanup</option>
+                  <option value={Department.cas}>CAS</option>
+                  <option value={Department.productEnhancement}>Product Enhancement</option>
+                  <option value={Department.crm}>CRM</option>
+                  <option value={Department.pdmp}>PDMP</option>
+                </select>
               </div>
             )}
-          </div>
+          </>
         )}
 
-        <div className="space-y-2">
-          <Label htmlFor="notes">Notes</Label>
-          <Textarea
-            id="notes"
-            placeholder="Add any additional notes..."
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+          <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
-            disabled={isRunning}
-            className="border-2 focus:border-primary"
+            className="w-full px-3 py-2 bg-[#252b3d] border border-gray-700 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            placeholder="Add any additional notes..."
           />
         </div>
 
-        <div className="flex gap-3 pt-2">
-          {manualMode ? (
-            <Button onClick={handleManualSubmit} disabled={createCase.isPending} className="flex-1 h-12 text-base font-semibold shadow-md">
-              {createCase.isPending ? 'Logging...' : 'Log Case'}
-            </Button>
-          ) : (
+        <div className="flex gap-3 pt-4">
+          {mode === 'auto' && (
             <>
               {!isRunning ? (
-                <Button onClick={handleStart} className="flex-1 h-12 text-base font-semibold shadow-md">
-                  <Play className="mr-2 h-5 w-5" />
-                  Start Timer
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleStop}
-                  variant="destructive"
-                  disabled={createCase.isPending}
-                  className="flex-1 h-12 text-base font-semibold shadow-md"
+                <button
+                  onClick={handleStart}
+                  className="btn-start flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all"
                 >
-                  <Square className="mr-2 h-5 w-5" />
-                  {createCase.isPending ? 'Logging...' : 'Stop & Log'}
-                </Button>
+                  <Play className="w-5 h-5" />
+                  Start
+                </button>
+              ) : (
+                <button
+                  onClick={handleStop}
+                  className="btn-stop flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all"
+                >
+                  <Square className="w-5 h-5" />
+                  Stop
+                </button>
               )}
             </>
           )}
 
-          {onBreakStart && (
-            <Button
-              onClick={onBreakStart}
-              variant="outline"
-              disabled={isRunning}
-              className="h-12 px-6 border-2 shadow-md"
-            >
-              <Coffee className="h-5 w-5" />
-            </Button>
-          )}
+          <button
+            onClick={handleBreak}
+            className="btn-break flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all"
+          >
+            <Coffee className="w-5 h-5" />
+            Break
+          </button>
+
+          <button
+            onClick={handleSave}
+            disabled={createCase.isPending}
+            className="btn-save flex-1 flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50"
+          >
+            <Save className="w-5 h-5" />
+            {createCase.isPending ? 'Saving...' : 'Save Record'}
+          </button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

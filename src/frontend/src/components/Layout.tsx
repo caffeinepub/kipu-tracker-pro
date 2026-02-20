@@ -1,98 +1,161 @@
-import { ReactNode } from 'react';
-import { Link, useNavigate } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
+import { Link, useLocation } from '@tanstack/react-router';
+import { Clock, BarChart3, FileText, Shield, Timer, RefreshCw, RotateCcw, Coffee } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
-import { LayoutDashboard, FileSpreadsheet, BarChart3, Shield } from 'lucide-react';
 
 interface LayoutProps {
-    children: ReactNode;
+  children: React.ReactNode;
 }
 
+export type TimeEntryMode = 'auto' | 'manual';
+
 export default function Layout({ children }: LayoutProps) {
-    const navigate = useNavigate();
+  const location = useLocation();
+  const [mode, setMode] = useState<TimeEntryMode>('auto');
 
-    return (
-        <div className="min-h-screen bg-background">
-            <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-                <div className="container flex h-16 items-center justify-between">
-                    <div className="flex items-center gap-8">
-                        <Link to="/" className="flex items-center gap-2">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-chart-1 to-chart-5">
-                                <LayoutDashboard className="h-6 w-6 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-xl font-bold bg-gradient-to-r from-chart-1 to-chart-5 bg-clip-text text-transparent">
-                                    Kipu Tracker Pro
-                                </h1>
-                            </div>
-                        </Link>
+  const isActive = (path: string) => location.pathname === path;
 
-                        <nav className="hidden md:flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate({ to: '/' })}
-                                className="gap-2"
-                            >
-                                <LayoutDashboard className="h-4 w-4" />
-                                Dashboard
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate({ to: '/batch-entry' })}
-                                className="gap-2"
-                            >
-                                <FileSpreadsheet className="h-4 w-4" />
-                                Batch Entry
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate({ to: '/analytics' })}
-                                className="gap-2"
-                            >
-                                <BarChart3 className="h-4 w-4" />
-                                Analytics
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate({ to: '/admin' })}
-                                className="gap-2"
-                            >
-                                <Shield className="h-4 w-4" />
-                                Admin
-                            </Button>
-                        </nav>
-                    </div>
+  const toggleMode = () => {
+    setMode(prev => prev === 'auto' ? 'manual' : 'auto');
+  };
 
-                    <div className="flex items-center gap-2">
-                        <ThemeToggle />
-                    </div>
-                </div>
-            </header>
+  // Clone children and pass mode props
+  const childrenWithProps = React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      return React.cloneElement(child, { mode, setMode } as any);
+    }
+    return child;
+  });
 
-            <main className="container py-8">{children}</main>
+  return (
+    <div className="min-h-screen bg-[#1a1f2e] text-gray-100">
+      <header className="sticky top-0 z-50 bg-[#1a1f2e]/95 backdrop-blur-sm border-b border-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-8">
+              <Link to="/" className="flex items-center gap-2 text-xl font-bold text-blue-400">
+                <Clock className="w-6 h-6" />
+                TimeTracker
+              </Link>
+              
+              <nav className="hidden md:flex items-center gap-1">
+                <Link
+                  to="/"
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    isActive('/') 
+                      ? 'bg-blue-600 text-white' 
+                      : 'text-gray-300 hover:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Dashboard
+                  </div>
+                </Link>
+                
+                <Link
+                  to="/batch-entry"
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    isActive('/batch-entry')
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-300 hover:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Batch Entry
+                  </div>
+                </Link>
+                
+                <Link
+                  to="/analytics"
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    isActive('/analytics')
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-300 hover:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <BarChart3 className="w-4 h-4" />
+                    Analytics
+                  </div>
+                </Link>
+                
+                <Link
+                  to="/admin"
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    isActive('/admin')
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-300 hover:bg-gray-800'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4" />
+                    Admin
+                  </div>
+                </Link>
+              </nav>
+            </div>
 
-            <footer className="border-t border-border/40 py-6 mt-16">
-                <div className="container flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-                    <p>© {new Date().getFullYear()} Kipu Tracker Pro. All rights reserved.</p>
-                    <p>
-                        Built with ❤️ using{' '}
-                        <a
-                            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
-                                window.location.hostname
-                            )}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-chart-1 hover:underline"
-                        >
-                            caffeine.ai
-                        </a>
-                    </p>
-                </div>
-            </footer>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={toggleMode}
+                className="btn-mode flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                title={`Switch to ${mode === 'auto' ? 'manual' : 'auto'} mode`}
+              >
+                <Timer className="w-4 h-4" />
+                {mode === 'auto' ? 'Auto' : 'Manual'}
+              </button>
+              
+              <button
+                className="btn-sync flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                title="Sync data"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Sync
+              </button>
+              
+              <button
+                className="btn-reset flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                title="Reset timer"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset
+              </button>
+              
+              <button
+                className="btn-break-header flex items-center gap-2 px-4 py-2 rounded-lg transition-colors"
+                title="Take a break"
+              >
+                <Coffee className="w-4 h-4" />
+                Break
+              </button>
+              
+              <ThemeToggle />
+            </div>
+          </div>
         </div>
-    );
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        {childrenWithProps}
+      </main>
+
+      <footer className="mt-auto py-6 border-t border-gray-800">
+        <div className="container mx-auto px-4 text-center text-gray-400 text-sm">
+          <p>
+            © {new Date().getFullYear()} Built with ❤️ using{' '}
+            <a
+              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              caffeine.ai
+            </a>
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
 }

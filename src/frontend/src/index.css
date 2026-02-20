@@ -45,25 +45,40 @@
     }
 
     .dark {
-        --background: 0.15 0.02 260;
-        --foreground: 0.95 0.01 60;
-        --card: 0.20 0.02 260;
-        --card-foreground: 0.95 0.01 60;
-        --popover: 0.18 0.02 260;
-        --popover-foreground: 0.95 0.01 60;
-        --primary: 0.70 0.20 25;
-        --primary-foreground: 0.15 0.02 260;
-        --secondary: 0.25 0.02 260;
-        --secondary-foreground: 0.95 0.01 60;
-        --muted: 0.25 0.02 260;
-        --muted-foreground: 0.60 0.02 60;
-        --accent: 0.30 0.03 260;
-        --accent-foreground: 0.95 0.01 60;
-        --destructive: 0.60 0.25 25;
-        --destructive-foreground: 0.95 0.01 60;
-        --border: 0.30 0.02 260;
-        --input: 0.30 0.02 260;
-        --ring: 0.70 0.20 25;
+        /* Dark navy blue theme matching reference image */
+        --background: 0.14 0.03 240;
+        --foreground: 0.92 0.01 240;
+        --card: 0.18 0.04 240;
+        --card-foreground: 0.92 0.01 240;
+        --popover: 0.16 0.04 240;
+        --popover-foreground: 0.92 0.01 240;
+        --primary: 0.65 0.20 280;
+        --primary-foreground: 0.98 0.01 240;
+        --secondary: 0.22 0.04 240;
+        --secondary-foreground: 0.92 0.01 240;
+        --muted: 0.24 0.03 240;
+        --muted-foreground: 0.60 0.02 240;
+        --accent: 0.26 0.04 240;
+        --accent-foreground: 0.92 0.01 240;
+        --destructive: 0.58 0.22 15;
+        --destructive-foreground: 0.98 0.01 240;
+        --border: 0.28 0.03 240;
+        --input: 0.22 0.04 240;
+        --ring: 0.65 0.20 280;
+        
+        /* Action button colors */
+        --btn-start: 0.62 0.20 150;
+        --btn-break: 0.60 0.22 290;
+        --btn-stop: 0.60 0.22 15;
+        --btn-save: 0.62 0.20 280;
+        --btn-mode: 0.68 0.22 45;
+        --btn-sync: 0.58 0.20 230;
+        --btn-reset: 0.92 0.01 240;
+        --btn-break-header: 0.62 0.24 330;
+        
+        /* Progress badge colors */
+        --badge-green: 0.62 0.20 150;
+        --badge-blue: 0.58 0.20 230;
         
         /* Chart colors - Adjusted for dark mode visibility */
         --chart-1: 0.70 0.22 25;
@@ -72,14 +87,14 @@
         --chart-4: 0.60 0.24 340;
         --chart-5: 0.80 0.22 50;
         
-        --sidebar: 0.20 0.02 260;
-        --sidebar-foreground: 0.95 0.01 60;
-        --sidebar-primary: 0.70 0.20 25;
-        --sidebar-primary-foreground: 0.15 0.02 260;
-        --sidebar-accent: 0.25 0.02 260;
-        --sidebar-accent-foreground: 0.95 0.01 60;
-        --sidebar-border: 0.30 0.02 260;
-        --sidebar-ring: 0.70 0.20 25;
+        --sidebar: 0.18 0.04 240;
+        --sidebar-foreground: 0.92 0.01 240;
+        --sidebar-primary: 0.65 0.20 280;
+        --sidebar-primary-foreground: 0.98 0.01 240;
+        --sidebar-accent: 0.22 0.04 240;
+        --sidebar-accent-foreground: 0.92 0.01 240;
+        --sidebar-border: 0.28 0.03 240;
+        --sidebar-ring: 0.65 0.20 280;
     }
 
     * {
@@ -95,5 +110,79 @@
 @layer utilities {
     .text-balance {
         text-wrap: balance;
+    }
+    
+    /* Custom button styles for dark theme */
+    .btn-start {
+        background: oklch(var(--btn-start));
+        color: white;
+    }
+    .btn-start:hover {
+        background: oklch(0.65 0.22 150);
+    }
+    
+    .btn-break {
+        background: oklch(var(--btn-break));
+        color: white;
+    }
+    .btn-break:hover {
+        background: oklch(0.63 0.24 290);
+    }
+    
+    .btn-stop {
+        background: oklch(var(--btn-stop));
+        color: white;
+    }
+    .btn-stop:hover {
+        background: oklch(0.63 0.24 15);
+    }
+    
+    .btn-save {
+        background: oklch(var(--btn-save));
+        color: white;
+    }
+    .btn-save:hover {
+        background: oklch(0.65 0.22 280);
+    }
+    
+    .btn-mode {
+        background: oklch(var(--btn-mode));
+        color: white;
+    }
+    .btn-mode:hover {
+        background: oklch(0.71 0.24 45);
+    }
+    
+    .btn-sync {
+        background: oklch(var(--btn-sync));
+        color: white;
+    }
+    .btn-sync:hover {
+        background: oklch(0.61 0.22 230);
+    }
+    
+    .btn-reset {
+        background: oklch(var(--btn-reset));
+        color: oklch(0.14 0.03 240);
+    }
+    .btn-reset:hover {
+        background: oklch(0.88 0.01 240);
+    }
+    
+    .btn-break-header {
+        background: oklch(var(--btn-break-header));
+        color: white;
+    }
+    .btn-break-header:hover {
+        background: oklch(0.65 0.26 330);
+    }
+    
+    /* Progress badge gradients */
+    .badge-green-gradient {
+        background: linear-gradient(135deg, oklch(0.62 0.20 150), oklch(0.55 0.18 160));
+    }
+    
+    .badge-blue-gradient {
+        background: linear-gradient(135deg, oklch(0.58 0.20 230), oklch(0.52 0.18 240));
     }
 }

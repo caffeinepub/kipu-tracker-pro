@@ -39,6 +39,29 @@ export function dateTimeLocalToNano(dateTimeLocal: string): bigint {
 }
 
 /**
+ * Convert milliseconds to nanoseconds
+ */
+export function convertToNanoseconds(milliseconds: number): bigint {
+  return BigInt(milliseconds) * BigInt(1_000_000);
+}
+
+/**
+ * Convert nanoseconds to milliseconds
+ */
+export function convertFromNanoseconds(nanoseconds: bigint): string {
+  const ms = Number(nanoseconds / BigInt(1_000_000));
+  const date = new Date(ms);
+  return dateToDateTimeLocal(date);
+}
+
+/**
+ * Get current datetime in IST as datetime-local format
+ */
+export function getCurrentISTDatetimeLocal(): string {
+  return dateToDateTimeLocal(new Date());
+}
+
+/**
  * Format nanosecond timestamp to IST display format
  */
 export function formatISTTime(nano: bigint): string {
@@ -58,11 +81,16 @@ export function formatISTTime(nano: bigint): string {
 /**
  * Validate that end time is after start time
  */
-export function validateTimeRange(startTime: string, endTime: string): boolean {
-  if (!startTime || !endTime) return false;
+export function validateTimeRange(startTime: string, endTime: string): { valid: boolean; error?: string } {
+  if (!startTime || !endTime) {
+    return { valid: false, error: 'Start and end times are required' };
+  }
   const start = dateTimeLocalToDate(startTime);
   const end = dateTimeLocalToDate(endTime);
-  return end > start;
+  if (end <= start) {
+    return { valid: false, error: 'End time must be after start time' };
+  }
+  return { valid: true };
 }
 
 /**
@@ -87,4 +115,17 @@ export function formatDuration(minutes: number): string {
     return `${hours}h ${mins}m`;
   }
   return `${mins}m`;
+}
+
+/**
+ * Format elapsed seconds to HH:MM:SS format with zero-padding
+ * 
+ * @param seconds - Total elapsed seconds
+ * @returns Formatted time string (e.g., "01:23:45")
+ */
+export function formatElapsedTime(seconds: number): string {
+  const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+  const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+  const s = (seconds % 60).toString().padStart(2, '0');
+  return `${h}:${m}:${s}`;
 }

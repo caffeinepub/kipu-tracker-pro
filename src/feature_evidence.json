@@ -2,10 +2,31 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-utilization-tracker-that-supports-multi-tasking-scenarios-where-agents-work-on-multiple-chats-and-emails-simultaneously-allowing-utilization-percentages-to-exceed-100",
-      "featureTitle": "Add utilization tracker that supports multi-tasking scenarios where agents work on multiple chats and emails simultaneously, allowing utilization percentages to exceed 100%",
+      "featureId": "feature-investigate-and-fix-the-mode-toggle-button-in-the-header-navigation-that-is-currently-non-functional-ensuring-it-properly-switches-between-manual-and-auto-time-entry-modes-in-the-casetimercontrols-component",
+      "featureTitle": "Investigate and fix the Mode toggle button in the header navigation that is currently non-functional, ensuring it properly switches between manual and auto time entry modes in the CaseTimerControls component",
       "files": [
-        "frontend/src/components/PersonalStats.tsx",
+        "frontend/src/components/CaseTimerControls.tsx",
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/pages/Dashboard.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-47"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-debug-and-fix-the-case-edit-functionality-in-editcasemodal-that-is-failing-to-update-cases-ensuring-edited-case-data-is-properly-submitted-to-the-backend-and-reflected-in-the-case-list",
+      "featureTitle": "Debug and fix the case edit functionality in EditCaseModal that is failing to update cases, ensuring edited case data is properly submitted to the backend and reflected in the case list",
+      "files": [
+        "frontend/src/components/EditCaseModal.tsx",
         "frontend/src/hooks/useQueries.ts"
       ],
       "components": [
@@ -17,73 +38,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-31"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-enhance-the-frontend-user-interface-design-to-improve-visual-appeal-layout-clarity-and-overall-user-experience-across-all-pages",
-      "featureTitle": "Enhance the frontend user interface design to improve visual appeal, layout clarity, and overall user experience across all pages",
-      "files": [
-        "frontend/src/components/CaseList.tsx",
-        "frontend/src/components/CaseTimerControls.tsx",
-        "frontend/src/components/PersonalStats.tsx",
-        "frontend/src/pages/BatchEntry.tsx",
-        "frontend/src/pages/Dashboard.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-32"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-manual-time-entry-fields-allowing-users-to-directly-input-start-time-and-end-time-when-creating-or-logging-cases-instead-of-only-using-the-live-timer",
-      "featureTitle": "Add manual time entry fields allowing users to directly input start time and end time when creating or logging cases, instead of only using the live timer",
-      "files": [
-        "frontend/src/components/CaseTimerControls.tsx",
-        "frontend/src/pages/BatchEntry.tsx",
-        "frontend/src/utils/timeHelpers.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-33"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-case-editing-functionality-allowing-users-to-modify-previously-logged-cases-including-all-case-details-times-and-emr-classification-fields",
-      "featureTitle": "Implement case editing functionality allowing users to modify previously logged cases, including all case details, times, and EMR classification fields",
-      "files": [
-        "frontend/src/components/CaseList.tsx",
-        "frontend/src/components/EditCaseModal.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/Dashboard.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-34"
+        "REQ-48"
       ],
       "confidence": "high"
     }

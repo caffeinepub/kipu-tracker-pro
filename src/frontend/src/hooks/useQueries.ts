@@ -1,158 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import {
-  Case,
-  TaskType,
-  CaseOrigin,
-  CaseType,
-  AssistanceNeeded,
-  TicketStatus,
-  EscalationTransferType,
-  Department,
-  UserProfile,
-} from '@/backend';
+import type { Case, UserProfile, TaskType, CaseOrigin, CaseType, AssistanceNeeded, TicketStatus, EscalationTransferType, Department } from '../backend';
+import { toast } from 'sonner';
 
-export function useGetAllCases() {
-  const { actor, isFetching } = useActor();
-
-  return useQuery<Case[]>({
-    queryKey: ['cases'],
-    queryFn: async () => {
-      if (!actor) return [];
-      return actor.getAllCases();
-    },
-    enabled: !!actor && !isFetching,
-  });
-}
-
-export function useCreateCase() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: {
-      agentName: string;
-      taskType: TaskType;
-      caseOrigin: CaseOrigin | null;
-      emrCaseNumber: string | null;
-      caseType: CaseType | null;
-      assistanceNeeded: AssistanceNeeded | null;
-      ticketStatus: TicketStatus | null;
-      escalationTransferType: EscalationTransferType | null;
-      escalationTransferDestination: Department | null;
-      start: bigint;
-      end: bigint;
-      notes: string;
-    }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.createCase(
-        data.agentName,
-        data.taskType,
-        data.caseOrigin === null ? null : data.caseOrigin,
-        data.emrCaseNumber === null ? null : data.emrCaseNumber,
-        data.caseType === null ? null : data.caseType,
-        data.assistanceNeeded === null ? null : data.assistanceNeeded,
-        data.ticketStatus === null ? null : data.ticketStatus,
-        data.escalationTransferType === null ? null : data.escalationTransferType,
-        data.escalationTransferDestination === null ? null : data.escalationTransferDestination,
-        data.start,
-        data.end,
-        data.notes
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cases'] });
-    },
-  });
-}
-
-export function useEditCase() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (data: {
-      caseId: bigint;
-      agentName: string;
-      taskType: TaskType;
-      caseOrigin: CaseOrigin | null;
-      emrCaseNumber: string | null;
-      caseType: CaseType | null;
-      assistanceNeeded: AssistanceNeeded | null;
-      ticketStatus: TicketStatus | null;
-      escalationTransferType: EscalationTransferType | null;
-      escalationTransferDestination: Department | null;
-      start: bigint;
-      end: bigint;
-      notes: string;
-    }) => {
-      if (!actor) throw new Error('Actor not available');
-      return actor.editCase(
-        data.caseId,
-        data.agentName,
-        data.taskType,
-        data.caseOrigin === null ? null : data.caseOrigin,
-        data.emrCaseNumber === null ? null : data.emrCaseNumber,
-        data.caseType === null ? null : data.caseType,
-        data.assistanceNeeded === null ? null : data.assistanceNeeded,
-        data.ticketStatus === null ? null : data.ticketStatus,
-        data.escalationTransferType === null ? null : data.escalationTransferType,
-        data.escalationTransferDestination === null ? null : data.escalationTransferDestination,
-        data.start,
-        data.end,
-        data.notes
-      );
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cases'] });
-    },
-  });
-}
-
-export function useBatchCreateCases() {
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (
-      cases: Array<{
-        agentName: string;
-        taskType: TaskType;
-        caseOrigin: CaseOrigin | null;
-        emrCaseNumber: string | null;
-        caseType: CaseType | null;
-        assistanceNeeded: AssistanceNeeded | null;
-        ticketStatus: TicketStatus | null;
-        escalationTransferType: EscalationTransferType | null;
-        escalationTransferDestination: Department | null;
-        startTime: bigint;
-        endTime: bigint;
-        notes: string;
-      }>
-    ) => {
-      if (!actor) throw new Error('Actor not available');
-      // Convert null to undefined for backend compatibility
-      const convertedCases = cases.map((c) => ({
-        agentName: c.agentName,
-        taskType: c.taskType,
-        caseOrigin: c.caseOrigin ?? undefined,
-        emrCaseNumber: c.emrCaseNumber ?? undefined,
-        caseType: c.caseType ?? undefined,
-        assistanceNeeded: c.assistanceNeeded ?? undefined,
-        ticketStatus: c.ticketStatus ?? undefined,
-        escalationTransferType: c.escalationTransferType ?? undefined,
-        escalationTransferDestination: c.escalationTransferDestination ?? undefined,
-        startTime: c.startTime,
-        endTime: c.endTime,
-        notes: c.notes,
-      }));
-      return actor.batchCreateCases(convertedCases);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['cases'] });
-    },
-  });
-}
+// Helper to convert null to undefined for backend compatibility
+const toUndefined = <T,>(value: T | null): T | undefined => {
+  return value === null ? undefined : value;
+};
 
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -179,9 +33,9 @@ export function useSaveCallerUserProfile() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { username: string; shiftPrefs: string }) => {
+    mutationFn: async ({ username, shiftPrefs }: { username: string; shiftPrefs: string }) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.saveCallerUserProfile(data.username, data.shiftPrefs);
+      return actor.saveCallerUserProfile(username, shiftPrefs);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
@@ -189,15 +43,163 @@ export function useSaveCallerUserProfile() {
   });
 }
 
-export function useGetUtilizationStats() {
+export function useGetAllCases() {
   const { actor, isFetching } = useActor();
 
-  return useQuery({
-    queryKey: ['utilizationStats'],
+  return useQuery<Case[]>({
+    queryKey: ['cases'],
     queryFn: async () => {
-      if (!actor) return { daily: null, weekly: null };
-      return actor.getUtilizationStats(BigInt(0));
+      if (!actor) return [];
+      return actor.getAllCases();
     },
     enabled: !!actor && !isFetching,
+  });
+}
+
+export function useCreateCase() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: {
+      agentName: string;
+      taskType: TaskType;
+      caseOrigin: CaseOrigin | null;
+      emrCaseNumber: string | null;
+      caseType: CaseType | null;
+      assistanceNeeded: AssistanceNeeded | null;
+      ticketStatus: TicketStatus | null;
+      escalationTransferType: EscalationTransferType | null;
+      escalationTransferDestination: Department | null;
+      start: bigint;
+      end: bigint;
+      notes: string;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      
+      return actor.createCase(
+        params.agentName,
+        params.taskType,
+        params.caseOrigin,
+        params.emrCaseNumber,
+        params.caseType,
+        params.assistanceNeeded,
+        params.ticketStatus,
+        params.escalationTransferType,
+        params.escalationTransferDestination,
+        params.start,
+        params.end,
+        params.notes
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cases'] });
+    },
+    onError: (error: any) => {
+      console.error('Create case error:', error);
+      toast.error(error.message || 'Failed to create case');
+    },
+  });
+}
+
+export function useEditCase() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (params: {
+      caseId: bigint;
+      agentName: string;
+      taskType: TaskType;
+      caseOrigin: CaseOrigin | null;
+      emrCaseNumber: string | null;
+      caseType: CaseType | null;
+      assistanceNeeded: AssistanceNeeded | null;
+      ticketStatus: TicketStatus | null;
+      escalationTransferType: EscalationTransferType | null;
+      escalationTransferDestination: Department | null;
+      start: bigint;
+      end: bigint;
+      notes: string;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      
+      console.log('Editing case with params:', {
+        caseId: params.caseId.toString(),
+        agentName: params.agentName,
+        taskType: params.taskType,
+        start: params.start.toString(),
+        end: params.end.toString(),
+      });
+
+      return actor.editCase(
+        params.caseId,
+        params.agentName,
+        params.taskType,
+        params.caseOrigin,
+        params.emrCaseNumber,
+        params.caseType,
+        params.assistanceNeeded,
+        params.ticketStatus,
+        params.escalationTransferType,
+        params.escalationTransferDestination,
+        params.start,
+        params.end,
+        params.notes
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cases'] });
+      toast.success('Case updated successfully');
+    },
+    onError: (error: any) => {
+      console.error('Edit case error:', error);
+      toast.error(error.message || 'Failed to update case');
+    },
+  });
+}
+
+export function useBatchCreateCases() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (cases: Array<{
+      agentName: string;
+      taskType: TaskType;
+      caseOrigin: CaseOrigin | null;
+      emrCaseNumber: string | null;
+      caseType: CaseType | null;
+      assistanceNeeded: AssistanceNeeded | null;
+      ticketStatus: TicketStatus | null;
+      escalationTransferType: EscalationTransferType | null;
+      escalationTransferDestination: Department | null;
+      startTime: bigint;
+      endTime: bigint;
+      notes: string;
+    }>) => {
+      if (!actor) throw new Error('Actor not available');
+      
+      // Convert null to undefined for backend compatibility
+      const casesWithUndefined = cases.map(c => ({
+        agentName: c.agentName,
+        taskType: c.taskType,
+        caseOrigin: toUndefined(c.caseOrigin),
+        emrCaseNumber: toUndefined(c.emrCaseNumber),
+        caseType: toUndefined(c.caseType),
+        assistanceNeeded: toUndefined(c.assistanceNeeded),
+        ticketStatus: toUndefined(c.ticketStatus),
+        escalationTransferType: toUndefined(c.escalationTransferType),
+        escalationTransferDestination: toUndefined(c.escalationTransferDestination),
+        startTime: c.startTime,
+        endTime: c.endTime,
+        notes: c.notes,
+      }));
+
+      return actor.batchCreateCases(casesWithUndefined);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cases'] });
+    },
   });
 }
