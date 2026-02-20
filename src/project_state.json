@@ -1,0 +1,339 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 9,
+  "summary": "Multi-user EMR case tracking system with detailed ticket classification, task types, and time logging for healthcare support teams",
+  "architectural_notes": [
+    "Backend built with Motoko canisters for on-chain data storage",
+    "Frontend using React + TypeScript with Tailwind CSS",
+    "Admin role with aggregated team statistics view",
+    "EMR-specific case tracking with healthcare support workflow fields",
+    "Time logging in IST format with automatic AM/PM detection",
+    "Comprehensive ticket lifecycle tracking from origin to resolution"
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-implement-internet-identity-authentication-system-allowing-users-to-sign-in-with-passkeys-google-apple-or-microsoft-accounts",
+      "title": "Implement Internet Identity authentication system allowing users to sign in with passkeys, Google, Apple, or Microsoft accounts",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-personal-dashboard-showing-each-user-s-own-cases-active-timers-and-individual-statistics-with-data-isolation-ensuring-users-only-see-their-own-data",
+      "title": "Build personal dashboard showing each user's own cases, active timers, and individual statistics with data isolation ensuring users only see their own data",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-admin-dashboard-displaying-team-wide-metrics-including-total-cases-handled-team-utilization-rates-and-average-resolution-times",
+      "title": "Implement admin dashboard displaying team-wide metrics including total cases handled, team utilization rates, and average resolution times",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-live-case-tracking-system-with-time-conflict-detection-that-alerts-users-when-attempting-to-log-overlapping-case-times",
+      "title": "Create live case tracking system with time conflict detection that alerts users when attempting to log overlapping case times",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-batch-entry-mode-allowing-users-to-log-multiple-cases-at-once-with-case-type-start-time-end-time-and-optional-notes",
+      "title": "Build batch entry mode allowing users to log multiple cases at once with case type, start time, end time, and optional notes",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-break-management-system-with-timer-and-visual-overlay-indicating-when-users-are-on-break",
+      "title": "Implement break management system with timer and visual overlay indicating when users are on break",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-analytics-dashboard-with-utilization-tracking-displaying-charts-for-daily-weekly-productivity-case-distribution-by-type-and-time-allocation",
+      "title": "Create analytics dashboard with utilization tracking, displaying charts for daily/weekly productivity, case distribution by type, and time allocation",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-csv-export-functionality-allowing-users-to-download-their-timesheet-records-with-case-details-times-and-durations",
+      "title": "Implement CSV export functionality allowing users to download their timesheet records with case details, times, and durations",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-dark-light-theme-toggle-with-user-preference-persistence-across-sessions",
+      "title": "Implement dark/light theme toggle with user preference persistence across sessions",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-design-and-implement-a-cohesive-visual-theme-with-warm-energetic-color-palette-coral-amber-teal-accents-clean-sans-serif-typography-and-card-based-layouts-that-emphasize-productivity-and-clarity",
+      "title": "Design and implement a cohesive visual theme with warm, energetic color palette (coral, amber, teal accents), clean sans-serif typography, and card-based layouts that emphasize productivity and clarity",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-protectedroute-wrapper-from-all-application-routes-so-dashboard-batch-entry-analytics-and-admin-pages-are-accessible-without-internet-identity-authentication",
+      "title": "Remove ProtectedRoute wrapper from all application routes so Dashboard, Batch Entry, Analytics, and Admin pages are accessible without Internet Identity authentication",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-or-hide-loginbutton-component-from-layout-header-navigation-since-authentication-is-no-longer-required",
+      "title": "Remove or hide LoginButton component from Layout header navigation since authentication is no longer required",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-modify-useactor-hook-to-initialize-backend-actor-without-requiring-internet-identity-authentication-or-delegation",
+      "title": "Modify useActor hook to initialize backend actor without requiring Internet Identity authentication or delegation",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-profilesetupmodal-requirement-or-make-it-optional-since-users-can-start-tracking-cases-immediately-without-creating-profiles",
+      "title": "Remove ProfileSetupModal requirement or make it optional since users can start tracking cases immediately without creating profiles",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-agent-name-text-input-field-to-case-tracking-form",
+      "title": "Add Agent Name text input field to case tracking form",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-existing-case-type-dropdown-with-task-type-dropdown-containing-11-emr-specific-options-support-emr-tickets-break-15-break-30-client-meeting-client-side-training-internal-team-meeting-pod-feedback-review-internal-training-conducted-by-eqx-training-new-team-member-training-feedback-new-team-member",
+      "title": "Replace existing case type dropdown with Task Type dropdown containing 11 EMR-specific options: Support EMR Tickets, Break - 15, Break - 30, Client Meeting, Client Side Training, Internal Team Meeting, POD, Feedback/Review, Internal Training (Conducted by EQX), Training - New Team Member, Training Feedback - New Team Member",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-case-classification-section-with-case-origin-dropdown-chat-email-voice-call-and-emr-case-text-input-field-displayed-only-when-task-type-is-support-emr-tickets",
+      "title": "Add Case Classification section with Case Origin dropdown (Chat, Email, Voice Call) and EMR Case# text input field, displayed only when Task Type is 'Support EMR Tickets'",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-case-type-dropdown-with-three-options-new-followup-reassigned-including-helper-text-explaining-when-to-use-each-option-displayed-only-when-task-type-is-support-emr-tickets",
+      "title": "Add Case Type dropdown with three options (New, Followup, Reassigned) including helper text explaining when to use each option, displayed only when Task Type is 'Support EMR Tickets'",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-assistance-needed-dropdown-with-three-options-no-equinox-onshore-including-helper-text-explaining-when-to-select-each-option-displayed-only-when-task-type-is-support-emr-tickets",
+      "title": "Add Assistance Needed dropdown with three options (No, Equinox, Onshore) including helper text explaining when to select each option, displayed only when Task Type is 'Support EMR Tickets'",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-ticket-case-status-dropdown-with-seven-options-on-hold-pending-resolved-open-new-escalated-transferred-with-helper-text-displayed-only-when-task-type-is-support-emr-tickets",
+      "title": "Add Ticket Case Status dropdown with seven options (On-Hold, Pending, Resolved, Open, New, Escalated, Transferred) with helper text, displayed only when Task Type is 'Support EMR Tickets'",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-escalation-transfer-classification-dropdown-with-three-options-n-a-transferred-escalated-including-helper-text-explaining-when-to-use-each-option-displayed-only-when-task-type-is-support-emr-tickets",
+      "title": "Add Escalation/Transfer Classification dropdown with three options (N/A, Transferred, Escalated) including helper text explaining when to use each option, displayed only when Task Type is 'Support EMR Tickets'",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-escalation-transfer-destination-dropdown-with-15-department-options-csm-billing-psa-client-advocates-mat-erx-lab-sales-accounting-emr-support-cleanup-cas-product-enhancement-crm-pdmp-displayed-only-when-escalation-transfer-classification-is-escalated-or-transferred",
+      "title": "Add Escalation/Transfer Destination dropdown with 15 department options (CSM, Billing, PSA, Client Advocates, MAT, eRX, Lab, Sales, Accounting, EMR Support, Cleanup, CAS, Product Enhancement, CRM, PDMP), displayed only when Escalation/Transfer Classification is 'Escalated' or 'Transferred'",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-modify-time-tracking-inputs-to-use-task-start-time-and-task-end-time-labels-with-ist-timezone-indicator-maintaining-existing-time-input-functionality-and-conflict-detection",
+      "title": "Modify time tracking inputs to use Task Start Time and Task End Time labels with IST timezone indicator, maintaining existing time input functionality and conflict detection",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-batch-entry-page-to-include-all-new-emr-case-classification-fields-with-conditional-visibility-matching-the-live-tracker-form",
+      "title": "Update batch entry page to include all new EMR case classification fields with conditional visibility matching the live tracker form",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-case-list-display-components-to-show-agent-name-task-type-and-key-emr-classification-details-case-origin-case-type-ticket-status-when-available",
+      "title": "Update case list display components to show agent name, task type, and key EMR classification details (case origin, case type, ticket status) when available",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-csv-export-to-include-all-new-emr-tracking-fields-in-exported-data",
+      "title": "Update CSV export to include all new EMR tracking fields in exported data",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-analytics-dashboard-charts-and-statistics-to-group-and-visualize-data-by-task-type-instead-of-the-old-case-type-field",
+      "title": "Update analytics dashboard charts and statistics to group and visualize data by Task Type instead of the old case type field",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-utilization-tracker-that-supports-multi-tasking-scenarios-where-agents-work-on-multiple-chats-and-emails-simultaneously-allowing-utilization-percentages-to-exceed-100",
+      "title": "Add utilization tracker that supports multi-tasking scenarios where agents work on multiple chats and emails simultaneously, allowing utilization percentages to exceed 100%",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-frontend-user-interface-design-to-improve-visual-appeal-layout-clarity-and-overall-user-experience-across-all-pages",
+      "title": "Enhance the frontend user interface design to improve visual appeal, layout clarity, and overall user experience across all pages",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-manual-time-entry-fields-allowing-users-to-directly-input-start-time-and-end-time-when-creating-or-logging-cases-instead-of-only-using-the-live-timer",
+      "title": "Add manual time entry fields allowing users to directly input start time and end time when creating or logging cases, instead of only using the live timer",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-case-editing-functionality-allowing-users-to-modify-previously-logged-cases-including-all-case-details-times-and-emr-classification-fields",
+      "title": "Implement case editing functionality allowing users to modify previously logged cases, including all case details, times, and EMR classification fields",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-21",
+      "summary": "Core EMR case tracking form with agent name and task type selection (Support EMR Tickets, Breaks, Meetings, Training, etc.)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "EMR case classification fields: Case Origin (Chat/Email/Voice Call) and EMR Case# input",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Case Type tracking (New/Followup/Reassigned) and Assistance Needed selection (No/Equinox/Onshore)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Ticket Status tracking (On-Hold/Pending/Resolved/Open/New/Escalated/Transferred) and Escalation/Transfer classification",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Escalation/Transfer destination tracking (CSM/Billing/PSA/EMR Support/eRx/Lab/etc.) with automatic field population",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Utilization time logging with Task Start Time and Task End Time in IST format",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Update backend case data model to include new fields: agentName, taskType, caseOrigin, emrCaseNumber, caseType, assistanceNeeded, ticketStatus, escalationTransferType, escalationTransferDestination",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "Add utilization tracker supporting multi-tasking with >100% utilization (concurrent chats and emails)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-38",
+      "summary": "Enhance frontend UI design and user experience",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-39",
+      "summary": "Add manual start and end time entry fields to case tracking form",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Add case edit functionality to modify logged cases after submission",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Kipu Tracker Pro",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

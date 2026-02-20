@@ -1,0 +1,108 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-20T15:22:07.963Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 4,
+    "implemented": 4,
+    "items": [
+      {
+        "id": "REQ-31",
+        "summary": "Add utilization tracker that supports multi-tasking scenarios where agents work on multiple chats and emails simultaneously, allowing utilization percentages to exceed 100%",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/PersonalStats.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/PersonalStats.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-32",
+        "summary": "Enhance the frontend user interface design to improve visual appeal, layout clarity, and overall user experience across all pages",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/src/components/PersonalStats.tsx",
+          "frontend/src/components/CaseTimerControls.tsx",
+          "frontend/src/components/CaseList.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/BatchEntry.tsx",
+          "frontend/src/pages/Analytics.tsx",
+          "frontend/src/pages/AdminDashboard.tsx",
+          "frontend/src/components/Layout.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/PersonalStats.tsx",
+          "frontend/src/components/CaseTimerControls.tsx",
+          "frontend/src/components/CaseList.tsx",
+          "frontend/src/pages/Dashboard.tsx",
+          "frontend/src/pages/BatchEntry.tsx"
+        ]
+      },
+      {
+        "id": "REQ-33",
+        "summary": "Add manual time entry fields allowing users to directly input start time and end time when creating or logging cases, instead of only using the live timer",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/CaseTimerControls.tsx",
+          "frontend/src/pages/BatchEntry.tsx",
+          "frontend/src/utils/timeHelpers.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/CaseTimerControls.tsx",
+          "frontend/src/pages/BatchEntry.tsx",
+          "frontend/src/utils/timeHelpers.ts"
+        ]
+      },
+      {
+        "id": "REQ-34",
+        "summary": "Implement case editing functionality allowing users to modify previously logged cases, including all case details, times, and EMR classification fields",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/CaseList.tsx",
+          "frontend/src/components/EditCaseModal.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/Dashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/CaseList.tsx",
+          "frontend/src/components/EditCaseModal.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/Dashboard.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/CaseList.tsx",
+    "frontend/src/components/CaseTimerControls.tsx",
+    "frontend/src/components/EditCaseModal.tsx",
+    "frontend/src/components/PersonalStats.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/pages/BatchEntry.tsx",
+    "frontend/src/pages/Dashboard.tsx",
+    "frontend/src/utils/timeHelpers.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

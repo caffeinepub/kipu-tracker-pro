@@ -1,0 +1,108 @@
+{
+  "kind": "build_request",
+  "title": "Add utilization tracker with multi-tasking support, UI enhancements, manual time entry, and case editing",
+  "projectName": "KIPU EMR Tracker",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-31",
+      "text": "Add utilization tracker that supports multi-tasking scenarios where agents work on multiple chats and emails simultaneously, allowing utilization percentages to exceed 100%",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-user-multitask"
+        ],
+        "quotes": [
+          "I work on multiple chats and emails most of the. can you add a utilization tracker as well because my utilization can go above 100%"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Utilization calculation accounts for concurrent tasks (multiple simultaneous chats/emails)",
+        "System allows and correctly displays utilization percentages above 100%",
+        "Backend data model supports tracking concurrent case sessions",
+        "Dashboard displays updated utilization metrics reflecting multi-tasking capability"
+      ]
+    },
+    {
+      "id": "REQ-32",
+      "text": "Enhance the frontend user interface design to improve visual appeal, layout clarity, and overall user experience across all pages",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-multitask"
+        ],
+        "quotes": [
+          "can you enhance the UI of of frontend"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Improved visual hierarchy and spacing across Dashboard, Batch Entry, Analytics, and Admin pages",
+        "Enhanced card designs with better shadow, border, and color contrast",
+        "Improved form layouts with better field grouping and visual feedback",
+        "Consistent styling improvements applied to all interactive elements (buttons, inputs, dropdowns)",
+        "Maintained accessibility standards and existing warm color palette theme"
+      ]
+    },
+    {
+      "id": "REQ-33",
+      "text": "Add manual time entry fields allowing users to directly input start time and end time when creating or logging cases, instead of only using the live timer",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-multitask"
+        ],
+        "quotes": [
+          "also add the option manually add start and end time"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Case tracking form includes optional manual start time and end time input fields",
+        "Users can choose between live timer mode or manual time entry mode",
+        "Manual time inputs support IST timezone format matching existing time display",
+        "Validation ensures manual end time is after start time",
+        "Time conflict detection works with manually entered times",
+        "Batch entry page also supports manual time entry"
+      ]
+    },
+    {
+      "id": "REQ-34",
+      "text": "Implement case editing functionality allowing users to modify previously logged cases, including all case details, times, and EMR classification fields",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-user-multitask"
+        ],
+        "quotes": [
+          "and edit case as well"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Case list displays edit button/icon for each logged case",
+        "Clicking edit opens a modal or form pre-populated with existing case data",
+        "All case fields are editable: agent name, task type, times, EMR classifications, notes",
+        "Backend implements updateCase mutation accepting case ID and updated fields",
+        "Validation rules apply to edited cases (required EMR fields when applicable)",
+        "Time conflict detection validates edited times against other cases",
+        "Successfully edited cases update immediately in the UI",
+        "Edit history or audit trail is maintained (optional enhancement)"
+      ]
+    }
+  ],
+  "constraints": [
+    "Maintain existing EMR-specific field conditional visibility rules (show classification fields only when Task Type is 'Support EMR Tickets')",
+    "Preserve IST timezone display format for all time fields",
+    "Keep existing time conflict detection logic functional with new manual entry and edit features",
+    "Do not modify immutable frontend paths: useInternetIdentity.ts, useInternetIdentity.tsx, useActor.ts, main.tsx, components/ui",
+    "Maintain single-actor backend architecture in backend/main.mo"
+  ],
+  "nonGoals": [
+    "Changing the core task type options or EMR classification dropdown values",
+    "Implementing real-time collaboration features",
+    "Adding authentication or user permission systems",
+    "Integrating with external EMR systems or APIs"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

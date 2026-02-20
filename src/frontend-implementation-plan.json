@@ -1,0 +1,149 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Add utilization tracker with multi-tasking support, UI enhancements, manual time entry, and case editing",
+  "requirements": [
+    {
+      "id": "REQ-31",
+      "summary": "Add utilization tracker supporting multi-tasking scenarios where utilization can exceed 100%",
+      "acceptanceCriteria": [
+        "Utilization calculation accounts for concurrent tasks (multiple simultaneous chats/emails)",
+        "System allows and correctly displays utilization percentages above 100%",
+        "Dashboard displays updated utilization metrics reflecting multi-tasking capability"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/PersonalStats.tsx",
+          "operation": "modify",
+          "description": "Update utilization calculation to support multi-tasking scenarios. Fetch utilization stats from backend using getUtilizationStats and display values that can exceed 100%. Update the utilization card to clearly indicate when multi-tasking is occurring (>100%). Ensure the UI properly formats and displays percentages above 100% without visual issues."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hook useGetUtilizationStats that calls the backend's getUtilizationStats method. Include proper typing for the response containing daily and weekly utilization percentages. Enable the query only when the actor is available."
+        }
+      ]
+    },
+    {
+      "id": "REQ-32",
+      "summary": "Enhance frontend UI design to improve visual appeal, layout clarity, and user experience",
+      "acceptanceCriteria": [
+        "Improved visual hierarchy and spacing across Dashboard, Batch Entry, Analytics, and Admin pages",
+        "Enhanced card designs with better shadow, border, and color contrast",
+        "Improved form layouts with better field grouping and visual feedback",
+        "Consistent styling improvements applied to all interactive elements (buttons, inputs, dropdowns)",
+        "Maintained accessibility standards and existing warm color palette theme"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Enhance global styles with improved spacing utilities, refined shadow definitions, and enhanced color contrast variables. Add utility classes for improved visual hierarchy. Maintain the existing OKLCH color system and warm palette while improving visual clarity."
+        },
+        {
+          "path": "frontend/src/components/PersonalStats.tsx",
+          "operation": "modify",
+          "description": "Enhance card design with improved shadows, borders, spacing, and color contrast. Add subtle hover effects and improve visual hierarchy of stat labels and values. Ensure consistent padding and alignment across all stat cards."
+        },
+        {
+          "path": "frontend/src/components/CaseTimerControls.tsx",
+          "operation": "modify",
+          "description": "Improve form layout with better field grouping, enhanced spacing, and clearer visual feedback. Add improved focus states, better label-input relationships, and enhanced validation error display. Group related fields visually (e.g., EMR-specific fields together) and improve button styling for better visual hierarchy."
+        },
+        {
+          "path": "frontend/src/components/CaseList.tsx",
+          "operation": "modify",
+          "description": "Enhance case list item design with improved card styling, better spacing, enhanced borders and shadows. Improve typography hierarchy for case details and add subtle hover effects. Ensure consistent visual treatment of all case metadata fields."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Improve overall page layout with enhanced spacing between major sections, better visual separation, and improved responsive design. Ensure consistent padding and margins throughout the dashboard."
+        },
+        {
+          "path": "frontend/src/pages/BatchEntry.tsx",
+          "operation": "modify",
+          "description": "Enhance batch entry form layout with improved visual grouping of fields, better spacing, and clearer section divisions. Improve table styling for batch case entries with enhanced borders, spacing, and hover states. Add better visual feedback for validation errors."
+        },
+        {
+          "path": "frontend/src/pages/Analytics.tsx",
+          "operation": "modify",
+          "description": "Improve analytics page layout with enhanced card designs for statistics, better spacing, and improved visual hierarchy. Enhance table styling with better borders, row hover effects, and clearer data presentation. Improve export button styling."
+        },
+        {
+          "path": "frontend/src/pages/AdminDashboard.tsx",
+          "operation": "modify",
+          "description": "Enhance admin dashboard with improved stat card designs, better spacing, and enhanced team activity list styling. Improve visual hierarchy and ensure consistent styling with other pages."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Enhance header navigation with improved styling, better spacing, and clearer active state indicators. Improve footer design and ensure consistent padding throughout the layout. Add subtle transitions for navigation state changes."
+        }
+      ]
+    },
+    {
+      "id": "REQ-33",
+      "summary": "Add manual time entry fields allowing direct input of start and end times",
+      "acceptanceCriteria": [
+        "Case tracking form includes optional manual start time and end time input fields",
+        "Users can choose between live timer mode or manual time entry mode",
+        "Manual time inputs support IST timezone format matching existing time display",
+        "Validation ensures manual end time is after start time",
+        "Time conflict detection works with manually entered times",
+        "Batch entry page also supports manual time entry"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CaseTimerControls.tsx",
+          "operation": "modify",
+          "description": "Add toggle between live timer mode and manual time entry mode. When in manual mode, replace the timer display with datetime-local input fields for start time and end time. Add validation to ensure end time is after start time. Convert between IST display format and the datetime-local input format. Maintain existing time conflict detection logic with manually entered times. Ensure EMR field validation still works correctly in manual mode."
+        },
+        {
+          "path": "frontend/src/pages/BatchEntry.tsx",
+          "operation": "modify",
+          "description": "Add manual time entry fields (start time and end time) to the batch entry form for each case row. Use datetime-local inputs that work with IST timezone. Add validation to ensure end times are after start times for each batch entry. Update the batch creation logic to handle manually entered times."
+        },
+        {
+          "path": "frontend/src/utils/timeHelpers.ts",
+          "operation": "create",
+          "description": "Create utility functions for time handling: convert between IST timestamps and datetime-local input format, validate time ranges, format time for display, and handle timezone conversions. Include helper functions for time conflict detection that work with both timer-based and manually entered times."
+        }
+      ]
+    },
+    {
+      "id": "REQ-34",
+      "summary": "Implement case editing functionality for modifying previously logged cases",
+      "acceptanceCriteria": [
+        "Case list displays edit button/icon for each logged case",
+        "Clicking edit opens a modal or form pre-populated with existing case data",
+        "All case fields are editable: agent name, task type, times, EMR classifications, notes",
+        "Validation rules apply to edited cases (required EMR fields when applicable)",
+        "Time conflict detection validates edited times against other cases",
+        "Successfully edited cases update immediately in the UI"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/CaseList.tsx",
+          "operation": "modify",
+          "description": "Add edit button/icon to each case item in the list. Handle click events to open the edit modal with the selected case data. Ensure the edit button is visually distinct and accessible."
+        },
+        {
+          "path": "frontend/src/components/EditCaseModal.tsx",
+          "operation": "create",
+          "description": "Create modal component for editing cases. Pre-populate form fields with existing case data including agent name, task type, start/end times, EMR-specific fields, and notes. Support both timer-based and manual time entry modes. Apply all validation rules including required EMR fields when task type is 'Support EMR Tickets'. Implement time conflict detection that validates edited times against other cases (excluding the current case being edited). Display validation errors clearly. On successful save, close the modal and invalidate the cases query to refresh the UI."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query mutation hook useEditCase that calls the backend's editCase method with case ID and updated fields. Include proper error handling and success callbacks. Invalidate the 'cases' query key on success to refresh the case list. Include optimistic updates if appropriate."
+        },
+        {
+          "path": "frontend/src/pages/Dashboard.tsx",
+          "operation": "modify",
+          "description": "Add state management for the edit modal (open/close state and selected case). Pass modal state handlers to CaseList component. Render the EditCaseModal component and wire it to the case selection from CaseList."
+        }
+      ]
+    }
+  ]
+}
